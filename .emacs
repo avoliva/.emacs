@@ -17,6 +17,7 @@
   :init (global-company-mode)
   :hook (prog-mode . company-mode)
   :config
+  (define-key company-active-map (kbd "<tab>") 'company-complete)
   (setq company-tooltip-align-annotations t)
   (setq company-minimum-prefix-length 1)
   (setq company-idle-delay 0.0))
@@ -63,6 +64,10 @@
   (setq lsp-ui-sideline-enable nil) ; Disable sideline if you don't want it
   (setq lsp-ui-doc-enable t)
   (setq lsp-ui-doc-position 'at-point))
+
+(use-package magit
+  :ensure t
+  :bind (("C-x g" . magit-status)))
 
 (use-package multiple-cursors
   :ensure t
@@ -123,10 +128,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("37c8c2817010e59734fe1f9302a7e6a2b5e8cc648cf6a6cc8b85f3bf17fececf" default))
+   '("f681100b27d783fefc3b62f44f84eb7fa0ce73ec183ebea5903df506eb314077" "fd029ad4c1213f32dbd50acfd4aead9aafc7b62d00c5bc6237ccb2bc028fabd1" "6198e96f1fd7de3889a1b6ab8be1fc9b7c734cc9db0b0f16b635a2974601f977" "37c8c2817010e59734fe1f9302a7e6a2b5e8cc648cf6a6cc8b85f3bf17fececf" default))
  '(ispell-dictionary nil)
  '(package-selected-packages
-   '(which-key treemacs-projectile treemacs multiple-cursors company-box exec-path-from-shell company helm-projectile helm projectile magit)))
+   '(evil-visual-mark-mode bubbleberry-theme dracula-theme which-key treemacs-projectile treemacs multiple-cursors company-box exec-path-from-shell company helm-projectile helm projectile magit)))
 
 
 ;;Reload this file
@@ -138,9 +143,18 @@
 (global-set-key (kbd "C-c e") 'my-reload-init-file)
 
 ;; Custom theme
-(load-theme 'monokai t)
+(load-theme 'bubbleberry t)
+(scroll-bar-mode -1)
+(menu-bar-mode -1)
+
 
 (global-display-line-numbers-mode 1) ; For displaying line numbers
+(defun my-disable-line-numbers-in-treemacs ()
+  "Disable line numbers in Treemacs buffers."
+  (display-line-numbers-mode -1))
+
+(add-hook 'treemacs-mode-hook #'my-disable-line-numbers-in-treemacs)
+
 
 ;; Change goto-line to be C-:
 (global-set-key (kbd "C-:") 'goto-line)
