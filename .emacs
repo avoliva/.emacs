@@ -65,7 +65,12 @@
   (setq lsp-ui-doc-position 'at-point))
 
 (use-package multiple-cursors
-  :ensure t)
+  :ensure t
+  :bind (("C-S-c C-S-c" . mc/edit-lines)
+         ("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-next-like-this)
+         ("C-c C-d" . mc/mark-next-like-this)
+         ("C-c C-k" . mc/skip-to-next-like-this)))
 
 (use-package projectile
   :ensure t
