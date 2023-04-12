@@ -84,15 +84,15 @@
 (setq treemacs-icon-set 'default)
 
 
-;; Treemacs config
-(global-set-key (kbd "C-x t t") 'treemacs)
-(global-set-key (kbd "C-x t p") 'treemacs-projectile)
-(global-set-key (kbd "C-x t a") 'treemacs-add-and-display-current-project)
-(setq treemacs-is-never-other-window t)
-
 (use-package treemacs-projectile
   :ensure t
   :after (treemacs projectile))
+
+(use-package typescript-mode
+  :ensure t
+  :mode "\\.ts\\'"
+  :config
+  (setq typescript-indent-level 2))
 
 
 (use-package which-key
@@ -101,6 +101,11 @@
   (which-key-mode)
   (setq which-key-popup-type 'side-window)
   (setq which-key-side-window-location 'bottom))
+
+(use-package yaml-mode
+  :ensure t
+  :mode ("\\.yml\\'" "\\.yaml\\'"))
+
 
 ;; Set to maximized
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
@@ -204,3 +209,9 @@
 
 
 
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
