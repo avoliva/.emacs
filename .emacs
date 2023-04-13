@@ -12,6 +12,11 @@
 (eval-when-compile
   (require 'use-package))
 
+(unless (package-installed-p 'all-the-icons)
+  (package-refresh-contents)
+  (package-install 'all-the-icons))
+(require 'all-the-icons)
+
 (use-package company
   :ensure t
   :init (global-company-mode)
@@ -23,9 +28,9 @@
   (setq company-idle-delay 0.0))
 
 ;; Optional, if you want prettier icons in the completion menu
-(use-package company-box
-  :ensure t
-  :hook (company-mode . company-box-mode))
+
+
+(remove-hook 'company-mode-hook 'company-box-mode)
 
 ;; Makes sure emacs is using shell $PATH
 (use-package exec-path-from-shell
@@ -34,6 +39,10 @@
   (when (memq window-system '(mac ns x)) ;; Use NVM node
     (exec-path-from-shell-initialize))
   (exec-path-from-shell-copy-env "NVM_DIR"))
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
 
 (use-package helm
   :ensure t
@@ -53,15 +62,21 @@
   :hook ((typescript-mode . lsp-deferred)
          (js-mode . lsp-deferred))
   :config
-  (setq lsp-enable-on-type-formatting nil))
+  (setq lsp-enable-on-type-formatting nil)
+  (setq lsp-modeline-diagnostics-enable nil))
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
 
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode
-  :after lsp-mode
   :hook (lsp-mode . lsp-ui-mode)
   :config
-  (setq lsp-ui-sideline-enable nil) ; Disable sideline if you don't want it
+  (setq lsp-ui-sideline-enable nil)
+  (setq lsp-ui-sideline-show-hover nil)
+  (setq lsp-ui-sideline-show-diagnostics t)
   (setq lsp-ui-doc-enable t)
   (setq lsp-ui-doc-position 'at-point))
 
@@ -72,10 +87,15 @@
 (use-package multiple-cursors
   :ensure t
   :bind (("C-S-c C-S-c" . mc/edit-lines)
-         ("C->" . mc/mark-next-like-this)
-         ("C-<" . mc/mark-next-like-this)
-         ("C-c C-d" . mc/mark-next-like-this)
-         ("C-c C-k" . mc/skip-to-next-like-this)))
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-c d" . mc/mark-next-like-this)
+         ("C-c k" . mc/skip-to-next-like-this)
+	 ("C-c C-d" . mc/mark-all-like-this)))
+
+(use-package prettier-js
+  :ensure t
+  :hook ((js-mode . prettier-js-mode)
+         (typescript-mode . prettier-js-mode)))
 
 (use-package projectile
   :ensure t
@@ -104,6 +124,8 @@
   :config
   (setq typescript-indent-level 2))
 
+(setq js-indent-level 2)
+
 
 (use-package which-key
   :ensure t
@@ -116,7 +138,16 @@
   :ensure t
   :mode ("\\.yml\\'" "\\.yaml\\'"))
 
+(use-package yasnippet
+  :hook (prog-mode . yas-minor-mode)
+  :config
+  (yas-reload-all)
+  (add-hook 'prog-mode-hook #'yas-minor-mode))
 
+(setq lsp-eslint-server-command
+      '("node"
+        "/home/avoliva/.nvm/versions/node/v18.15.0/lib/node_modules/typescript-language-server/lib/cli.js"
+        "--stdio"))
 ;; Set to maximized
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
@@ -131,7 +162,7 @@
    '("f681100b27d783fefc3b62f44f84eb7fa0ce73ec183ebea5903df506eb314077" "fd029ad4c1213f32dbd50acfd4aead9aafc7b62d00c5bc6237ccb2bc028fabd1" "6198e96f1fd7de3889a1b6ab8be1fc9b7c734cc9db0b0f16b635a2974601f977" "37c8c2817010e59734fe1f9302a7e6a2b5e8cc648cf6a6cc8b85f3bf17fececf" default))
  '(ispell-dictionary nil)
  '(package-selected-packages
-   '(evil-visual-mark-mode bubbleberry-theme dracula-theme which-key treemacs-projectile treemacs multiple-cursors company-box exec-path-from-shell company helm-projectile helm projectile magit)))
+   '(all-the-icons prettier-js flycheck yasnippet evil-visual-mark-mode bubbleberry-theme dracula-theme which-key treemacs-projectile treemacs multiple-cursors company-box exec-path-from-shell company helm-projectile helm projectile magit)))
 
 
 ;;Reload this file
@@ -225,9 +256,35 @@
       (add-to-list 'exec-path my-nvm-bin-path))
   (message "Warning: nvm node not found at %s" my-nvm-node-path))
 
+(defun my/use-local-eslint ()
+  "Use local eslint from node_modules before global."
+  (let* ((root (locate-dominating-file
+                (or (buffer-file-name) default-directory)
+                "node_modules"))
+         (eslint (and root
+                      (expand-file-name "node_modules/.bin/eslint"
+                                        root))))
+    (when (and eslint (file-executable-p eslint))
+      (setq-local flycheck-javascript-eslint-executable eslint))))
 
+(defun my/use-local-prettier ()
+  "Use local prettier from node_modules before global."
+  (let* ((root (locate-dominating-file
+                (or (buffer-file-name) default-directory)
+                "node_modules"))
+         (prettier (and root
+                        (expand-file-name "node_modules/.bin/prettier"
+                                          root))))
+    (when (and prettier (file-executable-p prettier))
+      (setq-local prettier-js-command prettier))))
 
+(add-hook 'js-mode-hook #'my/use-local-eslint)
+(add-hook 'typescript-mode-hook #'my/use-local-eslint)
+(add-hook 'js-mode-hook #'my/use-local-prettier)
+(add-hook 'typescript-mode-hook #'my/use-local-prettier)
 
+;; Overwrite C-z
+(global-set-key (kbd "C-z") 'undo)
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
