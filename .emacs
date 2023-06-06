@@ -29,8 +29,23 @@
 
 ;; Optional, if you want prettier icons in the completion menu
 
-
 (remove-hook 'company-mode-hook 'company-box-mode)
+
+;; Configure ivy to use flx for fuzzy matching
+(setq ivy-re-builders-alistx
+      '((t . ivy--regex-fuzzy))) ; Use fuzzy matching everywhere
+
+;; Install and configure counsel-projectile
+(use-package counsel-projectile
+  :ensure t
+  :bind (("C-c p" . counsel-projectile-find-file)
+         ("C-c f" . counsel-projectile-rg))
+  :config
+  (counsel-projectile-mode))
+
+(use-package eslintd-fix
+  :ensure t
+  :hook ((js-mode typescript-mode) . eslintd-fix-mode))
 
 ;; Makes sure emacs is using shell $PATH
 (use-package exec-path-from-shell
@@ -44,6 +59,10 @@
   :ensure t
   :init (global-flycheck-mode))
 
+;; Install and configure flx
+(use-package flx
+  :ensure t)
+
 (use-package helm
   :ensure t
   :config (helm-mode 1))
@@ -54,6 +73,14 @@
   :bind (("C-c p" . helm-projectile))
   :config
   (helm-projectile-on))
+
+;; Sublime's goto anything recreation
+(use-package ivy
+  :ensure t
+  :diminish
+  :bind (("C-c s" . swiper))
+  :config
+  (ivy-mode 1))
 
 ;; LSP and autocompletion stuff
 (use-package lsp-mode
@@ -103,6 +130,7 @@
   (define-key projectile-mode-map (kbd "M-p") 'projectile-command-map)
   (setq projectile-completion-system 'helm)
   (projectile-mode +1))
+
 
 (use-package treemacs
   :ensure t
@@ -159,10 +187,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("f681100b27d783fefc3b62f44f84eb7fa0ce73ec183ebea5903df506eb314077" "fd029ad4c1213f32dbd50acfd4aead9aafc7b62d00c5bc6237ccb2bc028fabd1" "6198e96f1fd7de3889a1b6ab8be1fc9b7c734cc9db0b0f16b635a2974601f977" "37c8c2817010e59734fe1f9302a7e6a2b5e8cc648cf6a6cc8b85f3bf17fececf" default))
+   '("c2efe6f5e2bd0bddfb2d6e26040545768939d2029f77e6b6a18d1ee0e0cb1033" "2a7d6f6a46b1b8504b269029a7375597f208a5cdfa1ea125b09255a592bb326e" "e16cd3e6093cf35e65dbac6c7649931936f32f56be34477cb7cbe1ee332c5b99" "72cc2c6c5642b117034b99dcc3a33ff97a66593429c7f44cd21b995b17eebd4e" "ffef467dfed832df46d4e188049e52aad1d64c16070484fc6b62f158ece95471" "f48be80177f0d9a2b19d8dc19f3903d9be3c4d885d110e82b591d1184586fad0" "f681100b27d783fefc3b62f44f84eb7fa0ce73ec183ebea5903df506eb314077" "fd029ad4c1213f32dbd50acfd4aead9aafc7b62d00c5bc6237ccb2bc028fabd1" "6198e96f1fd7de3889a1b6ab8be1fc9b7c734cc9db0b0f16b635a2974601f977" "37c8c2817010e59734fe1f9302a7e6a2b5e8cc648cf6a6cc8b85f3bf17fececf" default))
  '(ispell-dictionary nil)
  '(package-selected-packages
-   '(all-the-icons prettier-js flycheck yasnippet evil-visual-mark-mode bubbleberry-theme dracula-theme which-key treemacs-projectile treemacs multiple-cursors company-box exec-path-from-shell company helm-projectile helm projectile magit)))
+   '(ef-themes eslintd-fix prettier rg counsel-projectile counsel ag all-the-icons prettier-js flycheck yasnippet evil-visual-mark-mode bubbleberry-theme dracula-theme which-key treemacs-projectile treemacs multiple-cursors company-box exec-path-from-shell company helm-projectile helm projectile magit)))
 
 
 ;;Reload this file
@@ -283,6 +311,10 @@
 (add-hook 'js-mode-hook #'my/use-local-prettier)
 (add-hook 'typescript-mode-hook #'my/use-local-prettier)
 
+;; Tab to spaces
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+
 ;; Overwrite C-z
 (global-set-key (kbd "C-z") 'undo)
 (custom-set-faces
@@ -291,3 +323,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(provide '.emacs)
+;;;; .emacs ends here
